@@ -87,7 +87,6 @@ func (r *OrderRepository) Create(order *model.Order) (*model.Order, error) {
 }
 
 func (r *OrderRepository) GetByID(id string) (*model.Order, error) {
-	// Get order
 	var orderDB OrderDB
 	query := `SELECT * FROM orders WHERE id = ?`
 	err := r.db.Get(&orderDB, query, id)
@@ -98,7 +97,6 @@ func (r *OrderRepository) GetByID(id string) (*model.Order, error) {
 		return nil, fmt.Errorf("error fetching order: %w", err)
 	}
 
-	// Get order items
 	var itemsDB []OrderItemDB
 	query = `SELECT * FROM order_items WHERE order_id = ?`
 	err = r.db.Select(&itemsDB, query, id)
@@ -106,7 +104,6 @@ func (r *OrderRepository) GetByID(id string) (*model.Order, error) {
 		return nil, fmt.Errorf("error fetching order items: %w", err)
 	}
 
-	// Convert to model
 	order := &model.Order{
 		ID:        orderDB.ID,
 		Total:     orderDB.Total,
@@ -125,7 +122,6 @@ func (r *OrderRepository) GetByID(id string) (*model.Order, error) {
 }
 
 func (r *OrderRepository) List() ([]model.Order, error) {
-	// Get all orders
 	var ordersDB []OrderDB
 	query := `SELECT * FROM orders ORDER BY created_at DESC`
 	err := r.db.Select(&ordersDB, query)
@@ -143,7 +139,6 @@ func (r *OrderRepository) List() ([]model.Order, error) {
 		orderIDs[i] = order.ID
 	}
 
-	// Get all order items for these orders
 	var itemsDB []OrderItemDB
 	query, args, err := sqlx.In(`
 		SELECT * FROM order_items 
@@ -161,7 +156,6 @@ func (r *OrderRepository) List() ([]model.Order, error) {
 		return nil, fmt.Errorf("error fetching order items: %w", err)
 	}
 
-	// Create a map of order ID to its items
 	itemsByOrderID := make(map[string][]model.OrderItem)
 	for _, item := range itemsDB {
 		itemsByOrderID[item.OrderID] = append(itemsByOrderID[item.OrderID], model.OrderItem{
@@ -170,7 +164,6 @@ func (r *OrderRepository) List() ([]model.Order, error) {
 		})
 	}
 
-	// Combine orders with their items
 	orders := make([]model.Order, len(ordersDB))
 	for i, orderDB := range ordersDB {
 		order := model.Order{
@@ -181,6 +174,5 @@ func (r *OrderRepository) List() ([]model.Order, error) {
 		}
 		orders[i] = order
 	}
-
 	return orders, nil
 }

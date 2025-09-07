@@ -26,7 +26,6 @@ func InitDB() error {
 		return fmt.Errorf("error opening database: %w", err)
 	}
 
-	// Test the connection
 	if err := db.Ping(); err != nil {
 		return fmt.Errorf("error connecting to database: %w", err)
 	}
