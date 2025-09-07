@@ -37,6 +37,8 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Order routes
 	r.HandleFunc("/order", h.PlaceOrder).Methods("POST")
+	r.HandleFunc("/order", h.ListOrders).Methods("GET")
+	r.HandleFunc("/order/{orderId}", h.GetOrder).Methods("GET")
 }
 
 // CreateProduct handles POST /product
@@ -156,9 +158,13 @@ func (h *Handler) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 				order.Discounts = total * 0.1
 			} else {
 				fmt.Println("Coupon code " + orderReq.CouponCode + " is invalid")
+				http.Error(w, "Validation Exception", 422)
+				return
 			}
 		} else {
 			fmt.Println("Coupon code " + orderReq.CouponCode + " is invalid")
+			http.Error(w, "Validation Exception", 422)
+			return
 		}
 	}
 
@@ -175,6 +181,26 @@ func (h *Handler) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(createdOrder)
+}
+
+func (h *Handler) ListOrders(w http.ResponseWriter, r *http.Request) {
+	orders, err := h.orderRepo.List()
+	if err != nil {
+		http.Error(w, "Error getting all orders: "+err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(orders)
+}
+
+func (h *Handler) GetOrder(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	orderId := vars["orderId"]
+	order, err := h.orderRepo.GetByID(orderId)
+	if err != nil {
+		http.Error(w, "Error getting order: "+err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(order)
 }
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {

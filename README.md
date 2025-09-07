@@ -19,7 +19,12 @@ A Go-based backend service for online food ordering, built with Gorilla Mux.
 
 - `GET /product` - List products
 - `GET /product/{id}` - Get product details
+- `POST /product` - Create product
+
 - `POST /order` - Place order
+- `GET /order` - Get all orders
+- `GET /order/{id}` - Get order details
+- `GET /health` - Health check
 
 ## Project Structure
 
@@ -28,6 +33,10 @@ A Go-based backend service for online food ordering, built with Gorilla Mux.
 - `internal/` - Private application code
   - `handler/` - HTTP handlers
   - `model/` - Data models
+  - `repository/` - Database repository
+  - `database/` - Database connection
+- `data/` - Database file
+- `bin/` - Compiled binaries
 
 ## Development
 
